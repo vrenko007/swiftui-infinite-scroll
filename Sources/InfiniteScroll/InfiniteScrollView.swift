@@ -57,7 +57,7 @@ public struct InfiniteScrollView<
           }
         }
       }
-    }.onAppear {
+    }.onFirstAppear {
       model.firstLoad()
     }
   }
