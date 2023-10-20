@@ -13,6 +13,12 @@ public struct PageInfo: Equatable, Codable {
   public let offset: Int
   public static let `default`: PageInfo = PageInfo(hasNextPage: true, limit: 20, offset: 0)
 
+  public init(hasNextPage: Bool, limit: Int, offset: Int) {
+    self.hasNextPage = hasNextPage
+    self.limit = limit
+    self.offset = offset
+  }
+
   public static func next(
     from pageInfo: PageInfo,
     hasNextPage: Bool = true

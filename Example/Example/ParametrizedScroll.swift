@@ -16,7 +16,9 @@ struct ParametrizedScroll: View {
         Text("Group").tag("Group")
         Text("Team").tag("Team")
       }.pickerStyle(SegmentedPickerStyle())
-      InfiniteScrollView.ungroupped(pageInfo: PageInfo.default) { pageInfo in
+      InfiniteScrollView.ungroupped(
+        pageInfo: PageInfo(hasNextPage: true, limit: 1, offset: 0)
+      ) { pageInfo in
         (
           items: [PreviewItem(id: "\(parameter) \(UUID().uuidString)")],
           next: PageInfo.next(from: pageInfo, hasNextPage: true)
@@ -24,7 +26,6 @@ struct ParametrizedScroll: View {
       } itemView: { item in
         Text(item.id)
       }
-
     }
   }
 }

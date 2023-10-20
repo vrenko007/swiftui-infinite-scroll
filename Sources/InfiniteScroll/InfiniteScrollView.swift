@@ -1,31 +1,65 @@
 import SwiftUI
+import IdentifiedCollections
 
 public struct InfiniteScrollView<
   T: Identifiable & Hashable,
   GroupView: View,
   ItemView: View
 >: View {
+  public typealias Content = any View
 
+  @StateObject var model: InfiniteScrollViewModel<T>
 
-  var pageInfo: PageInfo
-  let loadPage: @Sendable (PageInfo) -> (items: [T], next: PageInfo)
-  let groupView: ([T], @escaping (T) -> ItemView) -> GroupView
-  let itemView: (T) -> ItemView
+  var groupView: (IdentifiedArrayOf<T>, @escaping (T) -> Content) -> GroupView
+  var itemView: (T) -> ItemView
 
   public init(
     pageInfo: PageInfo = PageInfo.default,
     loadPage: @Sendable @escaping (PageInfo) -> (items: [T], next: PageInfo),
-    groupView: @escaping ([T], @escaping (T) -> ItemView) -> GroupView,
+    groupView: @escaping (IdentifiedArrayOf<T>, @escaping (T) -> Content) -> GroupView,
     itemView: @escaping (T) -> ItemView
   ) {
     self.groupView = groupView
     self.itemView = itemView
-    self.pageInfo = pageInfo
-    self.loadPage = loadPage
+    self._model = StateObject(
+      wrappedValue: InfiniteScrollViewModel(
+        pageInfo: pageInfo,
+        loadPage: loadPage
+      )
+    )
   }
 
+  @ViewBuilder
   public var body: some View {
-    Text("Infinite Scroll View")
+    VStack {
+      switch model.state {
+      case .loadingFirstPage:
+        Text("Loading")
+      case let .error(error: error):
+        Text("Error: \(error.localizedDescription)")
+      case .empty:
+        Text("EmptyView")
+      default:
+        ScrollView {
+          LazyVStack {
+            groupView(model.items) { item in
+              itemView(item)
+                .onAppear {
+                  model.onItemAppear(item.id)
+                }
+            }
+            if model.state == .loadingNextPage {
+              ProgressView()
+            }
+            if model.state == .moreError {
+              Text("MoreError")
+            }
+          }
+        }
+      }
+    }.onAppear {
+      model.firstLoad()
+    }
   }
 }
 
@@ -33,7 +67,7 @@ public extension InfiniteScrollView {
   static func groupped(
     pageInfo: PageInfo = PageInfo.default,
     loadPage: @Sendable @escaping (PageInfo) -> (items: [T], next: PageInfo),
-    groupView: @escaping ([T], @escaping (T) -> ItemView) -> GroupView,
+    groupView: @escaping (IdentifiedArrayOf<T>, @escaping (T) -> Content) -> GroupView,
     itemView: @escaping (T) -> ItemView
   ) -> InfiniteScrollView {
     InfiniteScrollView(
@@ -57,7 +91,7 @@ public extension InfiniteScrollView where GroupView == AnyView {
       groupView: { ungrupped, itemView in
         AnyView(Group {
           ForEach(ungrupped) { item in
-            itemView(item)
+            AnyView(erasing: itemView(item))
           }
         })
       },
