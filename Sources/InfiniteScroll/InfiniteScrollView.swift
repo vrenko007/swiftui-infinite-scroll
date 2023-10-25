@@ -15,7 +15,7 @@ public struct InfiniteScrollView<
 
   public init(
     pageInfo: PageInfo = PageInfo.default,
-    loadPage: @Sendable @escaping (PageInfo) -> (items: [T], next: PageInfo),
+    loadPage: @Sendable @escaping (PageInfo) async throws -> (items: [T], next: PageInfo),
     groupView: @escaping (IdentifiedArrayOf<T>, @escaping (T) -> Content) -> GroupView,
     itemView: @escaping (T) -> ItemView
   ) {
@@ -53,6 +53,9 @@ public struct InfiniteScrollView<
             }
             if model.state == .moreError {
               Text("MoreError")
+              Button("retry") {
+                model.reloadMore()
+              }
             }
           }
         }
@@ -82,7 +85,7 @@ public extension InfiniteScrollView {
 public extension InfiniteScrollView where GroupView == ForEach<[T], T.ID, ItemView> {
   static func ungroupped(
     pageInfo: PageInfo = PageInfo.default,
-    loadPage: @Sendable @escaping (PageInfo) -> (items: [T], next: PageInfo),
+    loadPage: @Sendable @escaping (PageInfo) async throws -> (items: [T], next: PageInfo),
     itemView: @escaping (T) -> ItemView
   ) -> InfiniteScrollView {
     InfiniteScrollView(
