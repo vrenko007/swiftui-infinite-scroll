@@ -11,7 +11,7 @@ import IdentifiedCollections
 public class InfiniteScrollViewModel<T: Hashable & Identifiable>: ObservableObject {
   @Published private(set) var items: IdentifiedArrayOf<T> = []
   @Published private(set) var state = PagingState.loadingFirstPage
-  var loadPage: @Sendable (PageInfo) async throws -> (items: [T], next: PageInfo)
+  @Published var loadPage: @Sendable (PageInfo) async throws -> (items: [T], next: PageInfo)
   private let treshold: Int = 2
   private(set) var pageInfo: PageInfo
 

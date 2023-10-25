@@ -39,17 +39,14 @@ struct GruppedScroll: View {
         items: [PreviewItem(id: UUID().uuidString)],
         next: PageInfo.next(from: pageInfo, hasNextPage: true)
       )
-    } groupView: { ungroupped, itemView -> AnyView in
-      let sections = group(ungroupped)
-      return AnyView(Group {
-        ForEach(sections) { section in
-          Section(section.id) {
-            ForEach(section.items) { item in
-              AnyView(itemView(item))
-            }
+    } groupView: { ungroupped, itemView in
+      ForEach(group(ungroupped)) { section in
+        Section(section.id) {
+          ForEach(section.items) { item in
+            itemView(item)
           }
         }
-      })
+      }
     } itemView: { item in
       Text(item.id)
     }

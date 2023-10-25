@@ -6,17 +6,15 @@ public struct InfiniteScrollView<
   GroupView: View,
   ItemView: View
 >: View {
-  public typealias Content = any View
-
   @StateObject var model: InfiniteScrollViewModel<T>
 
-  var groupView: (IdentifiedArrayOf<T>, @escaping (T) -> Content) -> GroupView
+  var groupView: (IdentifiedArrayOf<T>, @escaping (T) -> InfiniteScrollGroupContent<T, ItemView>) -> GroupView
   var itemView: (T) -> ItemView
 
   public init(
     pageInfo: PageInfo = PageInfo.default,
     loadPage: @Sendable @escaping (PageInfo) async throws -> (items: [T], next: PageInfo),
-    groupView: @escaping (IdentifiedArrayOf<T>, @escaping (T) -> Content) -> GroupView,
+    groupView: @escaping (IdentifiedArrayOf<T>, @escaping (T) -> InfiniteScrollGroupContent<T, ItemView>) -> GroupView,
     itemView: @escaping (T) -> ItemView
   ) {
     self.groupView = groupView
@@ -43,10 +41,7 @@ public struct InfiniteScrollView<
         ScrollView {
           LazyVStack {
             groupView(model.items) { item in
-              itemView(item)
-                .onAppear {
-                  model.onItemAppear(item.id)
-                }
+              InfiniteScrollGroupContent(item: item, itemView: itemView, loadMore: model.onItemAppear)
             }
             if model.state == .loadingNextPage {
               ProgressView()
@@ -70,7 +65,7 @@ public extension InfiniteScrollView {
   static func groupped(
     pageInfo: PageInfo = PageInfo.default,
     loadPage: @Sendable @escaping (PageInfo) -> (items: [T], next: PageInfo),
-    groupView: @escaping (IdentifiedArrayOf<T>, @escaping (T) -> Content) -> GroupView,
+    groupView: @escaping (IdentifiedArrayOf<T>, @escaping (T) -> InfiniteScrollGroupContent<T, ItemView>) -> GroupView,
     itemView: @escaping (T) -> ItemView
   ) -> InfiniteScrollView {
     InfiniteScrollView(
@@ -82,7 +77,7 @@ public extension InfiniteScrollView {
   }
 }
 
-public extension InfiniteScrollView where GroupView == ForEach<[T], T.ID, ItemView> {
+public extension InfiniteScrollView where GroupView == ForEach<[T], T.ID, InfiniteScrollGroupContent<T, ItemView>> {
   static func ungroupped(
     pageInfo: PageInfo = PageInfo.default,
     loadPage: @Sendable @escaping (PageInfo) async throws -> (items: [T], next: PageInfo),
@@ -92,7 +87,7 @@ public extension InfiniteScrollView where GroupView == ForEach<[T], T.ID, ItemVi
       pageInfo: pageInfo,
       loadPage: loadPage,
       groupView: { ungrupped, itemView in
-        ForEach(ungrupped) { item in
+        ForEach(ungrupped.elements) { item in
           itemView(item)
         }
       },
