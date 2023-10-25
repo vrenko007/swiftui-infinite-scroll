@@ -45,7 +45,7 @@ public extension InfiniteScrollView {
   }
 }
 
-public extension InfiniteScrollView where GroupView == AnyView {
+public extension InfiniteScrollView where GroupView == ForEach<[T], T.ID, ItemView> {
   static func ungroupped(
     pageInfo: PageInfo = PageInfo.default,
     loadPage: @Sendable @escaping (PageInfo) -> (items: [T], next: PageInfo),
@@ -55,11 +55,9 @@ public extension InfiniteScrollView where GroupView == AnyView {
       pageInfo: pageInfo,
       loadPage: loadPage,
       groupView: { ungrupped, itemView in
-        AnyView(Group {
-          ForEach(ungrupped) { item in
-            itemView(item)
-          }
-        })
+        ForEach(ungrupped) { item in
+          itemView(item)
+        }
       },
       itemView: itemView
     )
