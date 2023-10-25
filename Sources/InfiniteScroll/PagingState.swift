@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum PagingState: Equatable {
+enum PagingState: Equatable {
   case loadingFirstPage
   case loaded
   case loadingNextPage
@@ -15,7 +15,7 @@ public enum PagingState: Equatable {
   case moreError
   case error(error: Error)
 
-  public static func == (lhs: PagingState, rhs: PagingState) -> Bool {
+  static func == (lhs: PagingState, rhs: PagingState) -> Bool {
     switch (lhs, rhs) {
     case
       (.loadingFirstPage, .loadingFirstPage),

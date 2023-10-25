@@ -19,7 +19,7 @@ struct UngruppedScroll: View {
       )
     } itemView: { item in
       Text(item.id)
-    }.tag(0)
+    }
   }
 }
 
