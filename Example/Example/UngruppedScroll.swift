@@ -11,7 +11,7 @@ import InfiniteScroll
 struct UngruppedScroll: View {
   var body: some View {
     InfiniteScrollView.ungroupped(
-      pageInfo: PageInfo.default
+      pageInfo: PageInfo(hasNextPage: true, limit: 1, offset: 0)
     ) { pageInfo in
       (
         items: [PreviewItem(id: UUID().uuidString)],
@@ -19,7 +19,7 @@ struct UngruppedScroll: View {
       )
     } itemView: { item in
       Text(item.id)
-    }.tag(0)
+    }
   }
 }
 
