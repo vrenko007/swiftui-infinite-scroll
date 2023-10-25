@@ -25,7 +25,7 @@ struct ParametrizedScroll: View {
         )
       } itemView: { item in
         Text(item.id)
-      }
+      }.id(parameter)
     }
   }
 }
